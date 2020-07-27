@@ -134,7 +134,7 @@ def main():
     train_dataset = datasets.ImageFolder(
         traindir,
         transforms.Compose(resize_transform + [
-            transforms.RandomResizedCrop(configs.DATA.crop_size),
+            transforms.Resize(configs.DATA.crop_size),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(), normalize
         ]))
@@ -145,7 +145,7 @@ def main():
 
     val_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(valdir, transforms.Compose( resize_transform + [
-            transforms.CenterCrop(configs.DATA.crop_size),
+            transforms.Resize(configs.DATA.crop_size),
             transforms.ToTensor(), normalize
         ])),
         batch_size=configs.DATA.batch_size, shuffle=False,
