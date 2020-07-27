@@ -1,11 +1,11 @@
 DATA=../c23_train/crps
 VAL=../c23_val/crps
 
-NAME=eps2
+NAME=2px
 
-CONFIG1=configs/configs_fast_phase1_${NAME}.yml
-CONFIG2=configs/configs_fast_phase2_${NAME}.yml
-CONFIG3=configs/configs_fast_phase3_${NAME}.yml
+CONFIG1=configs/configs_fast_${NAME}_phase1.yml
+CONFIG2=configs/configs_fast_${NAME}_phase2.yml
+CONFIG3=configs/configs_fast_${NAME}_phase3.yml
 
 PREFIX1=fast_adv_phase1_${NAME}
 PREFIX2=fast_adv_phase2_${NAME}

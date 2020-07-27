@@ -116,7 +116,7 @@ def main():
             print("=> no checkpoint found at '{}'".format(configs.resume))
     
     # Initiate data loaders
-    traindir configs.data
+    traindir = configs.data
     valdir = configs.val_data
     
     resize_transform = []
