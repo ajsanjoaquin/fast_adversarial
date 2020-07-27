@@ -1,4 +1,5 @@
-# This module is adapted from https://github.com/mahyarnajibi/FreeAdversarialTraining/blob/master/main_free.py
+#This module is adapted from https://github.com/locuslab/fast_adversarial/blob/master/ImageNet/main_fast.py
+# whcih in turn was adapted from https://github.com/mahyarnajibi/FreeAdversarialTraining/blob/master/main_free.py
 # Which in turn was adapted from https://github.com/pytorch/examples/blob/master/imagenet/main.py
 import init_paths
 import argparse
@@ -18,12 +19,13 @@ from utils import *
 from validation import validate, validate_pgd
 import torchvision.models as models
 
-from apex import amp
+from efficientnet_pytorch import EfficientNet
+#from apex import amp
 import copy
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
+    parser = argparse.ArgumentParser(description='PyTorch FF++ Fast Adversarial Training')
     parser.add_argument('data', metavar='DIR',
                     help='path to dataset')
     parser.add_argument('--output_prefix', default='fast_adv', type=str,
@@ -37,6 +39,10 @@ def parse_args():
     parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                     help='use pre-trained model')
     parser.add_argument('--restarts', default=1, type=int)
+
+    parser.add_argument('--load_checkpoint', default=None)
+    parser.add_argument('--enet', default=None)
+    parser.add_argument('--init_load', default=None)
     return parser.parse_args()
 
 
@@ -64,12 +70,18 @@ def main():
 
     
     # Create the model
-    if configs.pretrained:
+    if args.enet:
+        model = EfficientNet.from_pretrained('efficientnet-b5', num_classes = 2)
+    elif configs.pretrained:
         print("=> using pre-trained model '{}'".format(configs.TRAIN.arch))
         model = models.__dict__[configs.TRAIN.arch](pretrained=True)
     else:
         print("=> creating model '{}'".format(configs.TRAIN.arch))
         model = models.__dict__[configs.TRAIN.arch]()
+    
+    #for initial loading of efficient net weights only
+    if args.init_load:
+        model.load_state_dict(torch.load(args.load_checkpoint))
     # Wrap the model into DataParallel
     model.cuda()
 
@@ -116,25 +128,25 @@ def main():
     if configs.DATA.img_size > 0: 
         resize_transform = [ transforms.Resize(configs.DATA.img_size) ] 
 
+    normalize = transforms.Normalize(mean=configs.TRAIN.mean,
+                                    std=configs.TRAIN.std)
+
     train_dataset = datasets.ImageFolder(
         traindir,
         transforms.Compose(resize_transform + [
             transforms.RandomResizedCrop(configs.DATA.crop_size),
             transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
+            transforms.ToTensor(), normalize
         ]))
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=configs.DATA.batch_size, shuffle=True,
         num_workers=configs.DATA.workers, pin_memory=True, sampler=None)
-    
-    normalize = transforms.Normalize(mean=configs.TRAIN.mean,
-                                    std=configs.TRAIN.std)
 
     val_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(valdir, transforms.Compose( resize_transform + [
             transforms.CenterCrop(configs.DATA.crop_size),
-            transforms.ToTensor(),
+            transforms.ToTensor(), normalize
         ])),
         batch_size=configs.DATA.batch_size, shuffle=False,
         num_workers=configs.DATA.workers, pin_memory=True)
@@ -243,7 +255,8 @@ def train(train_loader, model, criterion, optimizer, epoch, lr_schedule, half=Fa
 
             optimizer.step()
 
-            prec1, prec5 = accuracy(output, target, topk=(1, 5))
+            #note: replaced 5 with 2 because binary classification; disregard top 5 metric
+            prec1, prec5 = accuracy(output, target, topk=(1, 2))
             losses.update(loss.item(), input.size(0))
             top1.update(prec1[0], input.size(0))
             top5.update(prec5[0], input.size(0))
