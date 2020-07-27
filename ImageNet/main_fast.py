@@ -1,7 +1,6 @@
 #This module is adapted from https://github.com/locuslab/fast_adversarial/blob/master/ImageNet/main_fast.py
 # whcih in turn was adapted from https://github.com/mahyarnajibi/FreeAdversarialTraining/blob/master/main_free.py
 # Which in turn was adapted from https://github.com/pytorch/examples/blob/master/imagenet/main.py
-import init_paths
 import argparse
 import os
 import time
@@ -62,8 +61,8 @@ def main():
     configs.ADV.clip_eps /= configs.DATA.max_color_value
     
     # Create output folder
-    if not os.path.isdir(os.path.join('trained_models', configs.output_name)):
-        os.makedirs(os.path.join('trained_models', configs.output_name))
+    if not os.path.isdir(os.path.join(configs.output_prefix, configs.output_name)):
+        os.makedirs(os.path.join(configs.output_prefix, configs.output_name))
     
     # Log the config details
     logger.info(pad_str(' ARGUMENTS '))
@@ -173,7 +172,7 @@ def main():
             'state_dict': model.state_dict(),
             'best_prec1': best_prec1,
             'optimizer' : optimizer.state_dict(),
-        }, is_best, os.path.join('trained_models', f'{configs.output_name}'),
+        }, is_best, os.path.join(configs.output_prefix, f'{configs.output_name}'),
         epoch + 1)
         
     # Automatically perform PGD Attacks at the end of training

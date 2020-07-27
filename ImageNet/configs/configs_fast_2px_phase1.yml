@@ -11,7 +11,7 @@ TRAIN:
     weight_decay: 0.0001
 
     # Print frequency, is used for both training and testing
-    print_freq: 60
+    print_freq: 7000
 
     # Dataset mean and std used for data normalization
     mean: !!python/tuple [0.5, 0.5, 0.5]
