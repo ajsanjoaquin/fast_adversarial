@@ -28,6 +28,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description='PyTorch FF++ Fast Adversarial Training')
     parser.add_argument('data', metavar='DIR',
                     help='path to dataset')
+    parser.add_argument('val_data', metavar='DIR',
+                    help='path to dataset')
     parser.add_argument('--output_prefix', default='fast_adv', type=str,
                     help='prefix used to define output path')
     parser.add_argument('-c', '--config', default='configs.yml', type=str, metavar='Path',
@@ -70,18 +72,12 @@ def main():
 
     
     # Create the model
-    if args.enet:
+    if configs.enet:
         model = EfficientNet.from_pretrained('efficientnet-b5', num_classes = 2)
-    elif configs.pretrained:
-        print("=> using pre-trained model '{}'".format(configs.TRAIN.arch))
-        model = models.__dict__[configs.TRAIN.arch](pretrained=True)
-    else:
-        print("=> creating model '{}'".format(configs.TRAIN.arch))
-        model = models.__dict__[configs.TRAIN.arch]()
     
     #for initial loading of efficient net weights only
-    if args.init_load:
-        model.load_state_dict(torch.load(args.load_checkpoint))
+    if configs.init_load:
+        model.load_state_dict(torch.load(configs.load_checkpoint))
     # Wrap the model into DataParallel
     model.cuda()
 
@@ -120,8 +116,8 @@ def main():
             print("=> no checkpoint found at '{}'".format(configs.resume))
     
     # Initiate data loaders
-    traindir = os.path.join(configs.data, 'train')
-    valdir = os.path.join(configs.data, 'val')
+    traindir configs.data
+    valdir = configs.val_data
     
     resize_transform = []
 
