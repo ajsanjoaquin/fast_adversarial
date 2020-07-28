@@ -1,4 +1,4 @@
-from utils import *
+from .utils import *
 import torch
 import sys
 import numpy as np
