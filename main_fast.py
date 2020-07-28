@@ -14,8 +14,8 @@ import torchvision.datasets as datasets
 from torch.autograd import Variable
 import math
 import numpy as np
-from utils import *
-from validation import validate, validate_pgd
+from lib.utils import *
+from lib.validation import validate, validate_pgd
 import torchvision.models as models
 
 from efficientnet_pytorch import EfficientNet
