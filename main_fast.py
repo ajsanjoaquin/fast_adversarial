@@ -83,7 +83,7 @@ def main():
     # reverse mapping
     param_to_moduleName = {}
     for m in model.modules():
-        for p in m.parameters(recurse=False):
+        for p in m.parameters():
             param_to_moduleName[p] = str(type(m).__name__)
 
     # Criterion:
