@@ -1,0 +1,24 @@
+#!/bin/sh
+#PBS -N enet_adv_m3
+#PBS -q gpu
+#PBS -l select=1:ngpus=1:ncpus=24:mem=40gb
+#PBS -l walltime=40:00:00
+#PBS -j oe
+## change next line to correct project code:
+#PBS -P <blank>
+
+cd $PBS_O_WORKDIR
+
+# Load container environment
+module load singularity/latest
+singularity exec --nv ../pytorch.sif /bin/bash << EOF
+
+nvidia-smi
+
+python -u main_fast.py ../c23_train/crp ../c23_val/crp \
+-c configs/configs_fast_2px_phase1.yml \
+--enet True --init_load True \
+--load_checkpoint /scratch/users/nus/dcsduxi/FF++/deepfake_detection/std_adv_m3/checkpoint_1.pth \
+--output_prefix ec23 | tee fast_eval_phase1_2px.out
+
+EOF
